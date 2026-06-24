@@ -1,0 +1,52 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+// Importujemy oficjalne biblioteki standardu Base B20
+import {Script, console} from "forge-std/Script.sol";
+import {B20Constants} from "base-std/lib/B20Constants.sol";
+import {B20FactoryLib} from "base-std/lib/B20FactoryLib.sol";
+import {IB20Factory} from "base-std/interfaces/IB20Factory.sol";
+import {StdPrecompiles} from "base-std/StdPrecompiles.sol";
+
+contract CreatePikoloB20 is Script {
+    function run() external returns (address tokenAddress) {
+        // Portfel uruchamiający skrypt staje się administratorem
+        address myWallet = vm.envAddress("ACCOUNT_ADDRESS");
+        
+        // Unikalna sól do wygenerowania adresu tokena (możesz zmienić tekst)
+        bytes32 salt = keccak256("pikolo-token-b20-salt");
+
+        // Konfiguracja podstawowa: Nazwa, Symbol, Admin, Miejsca po przecinku (18)
+        bytes memory params = B20FactoryLib.encodeAssetCreateParams(
+            "Pikolo", 
+            "PIK", 
+            myWallet, 
+            18
+        );
+
+        // Konfiguracja dodatkowa (wywoływana atomowo podczas tworzenia)
+        bytes[] memory initCalls = new bytes[](2);
+        
+        // 1. Nadanie Twojemu portfelowi uprawnień do bicia (Mint)
+        initCalls[0] = B20FactoryLib.encodeGrantRole(B20Constants.MINT_ROLE, myWallet);
+        
+        // 2. Ustawienie maksymalnego limitu podaży na 100 000 000 monet
+        initCalls[1] = B20FactoryLib.encodeUpdateSupplyCap(100000000e18);
+
+        // Rozpoczęcie nadawania transakcji do sieci Base
+        vm.startBroadcast();
+
+        // Wywołanie wbudowanej fabryki B20 na sieci Base
+        tokenAddress = StdPrecompiles.B20_FACTORY.createB20(
+            IB20Factory.B20Variant.ASSET, 
+            salt, 
+            params, 
+            initCalls
+        );
+
+        vm.stopBroadcast();
+
+        console.log("Sukces! Twoj natywny token B20 Pikolo zostal utworzony pod adresem:");
+        console.log(tokenAddress);
+    }
+}
