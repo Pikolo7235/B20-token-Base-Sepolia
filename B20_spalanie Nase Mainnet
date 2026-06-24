@@ -1,0 +1,26 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+
+contract PikoloMainnetBurnable is ERC20, ERC20Burnable, Ownable {
+
+    // Konstruktor ustawia oficjalną nazwę "Pikolo" oraz symbol "PIK"
+    constructor(address initialOwner) 
+        ERC20("Pikolo", "PIK") 
+        Ownable(initialOwner) 
+    {
+        // Generuje 1 000 000 tokenów na start i przypisuje je do Twojego portfela
+        _mint(initialOwner, 1000000 * 10**decimals());
+    }
+
+    /**
+     * @dev Tworzy nowe tokeny. 
+     * Dzięki 'onlyOwner' tylko Twój portfel zarządzający ma do niej dostęp.
+     */
+    function mint(address to, uint256 amount) public onlyOwner {
+        _mint(to, amount);
+    }
+}
