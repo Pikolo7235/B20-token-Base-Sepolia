@@ -1,0 +1,23 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+
+contract B20TestnetToken is ERC20, Ownable {
+
+    // Podczas wdrożenia podajesz adres, który stanie się właścicielem (Twój portfel)
+    constructor(address initialOwner) 
+        ERC20("B20 Testnet Token", "B20") 
+        Ownable(initialOwner) 
+    {
+        // Automatycznie generuje 1 000 000 tokenów (uwzględniając 18 miejsc po przecinku)
+        // i przypisuje je do Twojego portfela zaraz po wdrożeniu
+        _mint(initialOwner, 1000000 * 10**decimals());
+    }
+
+    // Bezpieczna funkcja mint – tylko Ty jako Owner możesz z niej korzystać
+    function mint(address to, uint256 amount) public onlyOwner {
+        _mint(to, amount);
+    }
+}
