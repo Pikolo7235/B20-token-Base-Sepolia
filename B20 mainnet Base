@@ -1,0 +1,22 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+
+contract PikoloTokenMainnet is ERC20, Ownable {
+
+    // Konstruktor ustawia nazwę "Pikolo" oraz symbol "PIK"
+    constructor(address initialOwner) 
+        ERC20("Pikolo", "PIK") 
+        Ownable(initialOwner) 
+    {
+        // Generuje 1 000 000 tokenów na start dla właściciela
+        _mint(initialOwner, 1000000 * 10**decimals());
+    }
+
+    // Bezpieczna funkcja mint chroniona modyfikatorem onlyOwner
+    function mint(address to, uint256 amount) public onlyOwner {
+        _mint(to, amount);
+    }
+}
